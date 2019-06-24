@@ -119,7 +119,7 @@ public class FilePath extends CordovaPlugin {
         
         // Get the file name;
         // String fileName = getFileName(pvUrl, appContext);
-        String typeName = typeName(pvUrl, appContext);
+        String typeName = getType(pvUrl, appContext);
 
         //check result; send error/success callback
         if (filePath == GET_PATH_ERROR_ID) {
