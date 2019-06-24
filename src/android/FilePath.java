@@ -118,7 +118,8 @@ public class FilePath extends CordovaPlugin {
         }
         
         // Get the file name;
-        String fileName = getFileName(pvUrl, appContext);
+        // String fileName = getFileName(pvUrl, appContext);
+        String typeName = typeName(pvUrl, appContext);
 
         //check result; send error/success callback
         if (filePath == GET_PATH_ERROR_ID) {
@@ -135,17 +136,26 @@ public class FilePath extends CordovaPlugin {
         }
         else {
             Log.d(TAG, "Filepath: " + filePath);
-            Log.d(TAG, "Filename: " + fileName);
+            Log.d(TAG, "Type: " + typeName);
 
-            this.callback.success("file://" + filePath + "~" + fileName);
+            this.callback.success("file://" + filePath + "~" + typeName);
         }
     }
     
-    public static String getFileName(Uri uri, Context context) {
+    
+    
+    public static String getType(Uri uri, Context context) {
         String result = null;
 
+        try {
+            result = context.getContentResolver().getType(uri);
+        } finally {
+            if (result == null) 
+                result = '';
+        }
+        
         //if uri is content
-        if (uri.getScheme() != null && uri.getScheme().equals("content")) {
+        /*if (uri.getScheme() != null && uri.getScheme().equals("content")) {
             Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
             try {
                 if (cursor != null && cursor.moveToFirst()) {
@@ -172,7 +182,8 @@ public class FilePath extends CordovaPlugin {
         //get filename + ext of path
         int cut = result.lastIndexOf('/');
         if (cut != -1)
-            result = result.substring(cut + 1);
+            result = result.substring(cut + 1);*/
+        
         return result;
     }
 
