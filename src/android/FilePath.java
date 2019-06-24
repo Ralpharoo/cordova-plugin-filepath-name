@@ -142,7 +142,7 @@ public class FilePath extends CordovaPlugin {
     }
     
     public static String getFileName(Uri uri, Context context) {
-        String result;
+        String result = null;
 
         //if uri is content
         if (uri.getScheme() != null && uri.getScheme().equals("content")) {
