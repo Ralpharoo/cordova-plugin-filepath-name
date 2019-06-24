@@ -116,6 +116,9 @@ public class FilePath extends CordovaPlugin {
         } else {
             filePath = getPath(appContext, pvUrl);
         }
+        
+        // Get the file name;
+        String fileName = getFileName(appContext);
 
         //check result; send error/success callback
         if (filePath == GET_PATH_ERROR_ID) {
@@ -132,9 +135,43 @@ public class FilePath extends CordovaPlugin {
         }
         else {
             Log.d(TAG, "Filepath: " + filePath);
+            Log.d(TAG, "Filename: " + fileName);
 
-            this.callback.success("file://" + filePath);
+            this.callback.success("file://" + filePath + "~" + fileName);
         }
+    }
+    
+    public static String getFileName(Uri uri) {
+        String result;
+
+        //if uri is content
+        if (uri.getScheme() != null && uri.getScheme().equals("content")) {
+            Cursor cursor = global.getInstance().context.getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    //local filesystem
+                    int index = cursor.getColumnIndex("_data");
+                    if(index == -1)
+                        //google drive
+                        index = cursor.getColumnIndex("_display_name");
+                    result = cursor.getString(index);
+                    if(result != null)
+                        uri = Uri.parse(result);
+                    else
+                        return null;
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        result = uri.getPath();
+
+        //get filename + ext of path
+        int cut = result.lastIndexOf('/');
+        if (cut != -1)
+            result = result.substring(cut + 1);
+        return result;
     }
 
     public static String getFilePathFromURI(Context context, Uri contentUri) {
@@ -455,12 +492,15 @@ public class FilePath extends CordovaPlugin {
 
             // Return the remote address
             if (isGooglePhotosUri(uri)) {
-                String contentPath = getContentFromSegments(uri.getPathSegments());
-                if (contentPath != "") {
-                    return getPath(context, Uri.parse(contentPath));
-                }
-                else {
-                    return null;
+                if (uri.toString().contains("mediakey")) {
+                    return getDriveFilePath(uri, context);
+                } else {
+                    String contentPath = getContentFromSegments(uri.getPathSegments());
+                    if (contentPath != "") {
+                        return getPath(context, Uri.parse(contentPath));
+                    } else {
+                        return null;
+                    }
                 }
             }
 
