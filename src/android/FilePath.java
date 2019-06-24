@@ -118,7 +118,7 @@ public class FilePath extends CordovaPlugin {
         }
         
         // Get the file name;
-        String fileName = getFileName(appContext);
+        String fileName = getFileName(pvUrl, appContext);
 
         //check result; send error/success callback
         if (filePath == GET_PATH_ERROR_ID) {
@@ -141,20 +141,22 @@ public class FilePath extends CordovaPlugin {
         }
     }
     
-    public static String getFileName(Uri uri) {
+    public static String getFileName(Uri uri, Context context) {
         String result;
 
         //if uri is content
         if (uri.getScheme() != null && uri.getScheme().equals("content")) {
-            Cursor cursor = global.getInstance().context.getContentResolver().query(uri, null, null, null, null);
+            Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
             try {
                 if (cursor != null && cursor.moveToFirst()) {
                     //local filesystem
                     int index = cursor.getColumnIndex("_data");
                     if(index == -1)
-                        //google drive
-                        index = cursor.getColumnIndex("_display_name");
-                    result = cursor.getString(index);
+                        index = cursor.getColumnIndex("_display_name"); //google drive
+                    
+                    if(index > -1)
+                        result = cursor.getString(index);
+                    
                     if(result != null)
                         uri = Uri.parse(result);
                     else
