@@ -151,7 +151,7 @@ public class FilePath extends CordovaPlugin {
             result = context.getContentResolver().getType(uri);
         } finally {
             if (result == null) 
-                result = '';
+                result = "";
         }
         
         //if uri is content
